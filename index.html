@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ahmad Aditya Harmawan — Portofolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f14;
+    --bg-2:#0e141b;
+    --panel:#121922;
+    --panel-2:#0f151d;
+    --line:#26313d;
+    --line-soft:#1b232c;
+    --text:#e7edf3;
+    --text-dim:#8496a6;
+    --text-faint:#4d5c6a;
+    --rec:#e8603f;
+    --net:#4fd1c5;
+    --amber:#e0a640;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'IBM Plex Sans', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 20% -10%, #142330 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 10%, #1a1420 0%, transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--net); color:#04121a;}
+
+  a{color:inherit;}
+
+  /* ---------- scanline / noise overlay ---------- */
+  .scanlines{
+    pointer-events:none;
+    position:fixed; inset:0; z-index:50;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.018) 0px,
+      rgba(255,255,255,0.018) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode:overlay;
+    opacity:.5;
+  }
+
+  /* ---------- HUD frame elements reused on every feed panel ---------- */
+  .feed{
+    position:relative;
+    background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:28px clamp(18px,4vw,44px) 34px;
+    margin:0 auto 22px;
+    max-width:920px;
+    overflow:hidden;
+  }
+  .feed::before{ /* corner brackets */
+    content:"";
+    position:absolute; inset:8px;
+    border:1px solid transparent;
+    background:
+      linear-gradient(var(--line-soft),var(--line-soft)) 0 0 / 16px 1px no-repeat,
+      linear-gradient(var(--line-soft),var(--line-soft)) 0 0 / 1px 16px no-repeat,
+      linear-gradient(var(--line-soft),var(--line-soft)) 100% 0 / 16px 1px no-repeat,
+      linear-gradient(var(--line-soft),var(--line-soft)) 100% 0 / 1px 16px no-repeat,
+      linear-gradient(var(--line-soft),var(--line-soft)) 0 100% / 16px 1px no-repeat,
+      linear-gradient(var(--line-soft),var(--line-soft)) 0 100% / 1px 16px no-repeat,
+      linear-gradient(var(--line-soft),var(--line-soft)) 100% 100% / 16px 1px no-repeat,
+      linear-gradient(var(--line-soft),var(--line-soft)) 100% 100% / 1px 16px no-repeat;
+    pointer-events:none;
+  }
+  .hud-top{
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+    color:var(--text-faint);
+    margin-bottom:22px;
+    flex-wrap:wrap; gap:8px;
+  }
+  .hud-rec{display:flex; align-items:center; gap:7px; color:var(--rec);}
+  .rec-dot{
+    width:7px; height:7px; border-radius:50%; background:var(--rec);
+    box-shadow:0 0 8px var(--rec);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.25;}}
+  .hud-clock{font-variant-numeric:tabular-nums;}
+  .cam-tag{
+    font-family:var(--mono); font-size:11px; color:var(--net);
+    letter-spacing:.08em;
+  }
+
+  /* ---------- NAV ---------- */
+  .topnav{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px clamp(16px,4vw,44px);
+    background:rgba(11,15,20,0.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line-soft);
+    font-family:var(--mono); font-size:12px;
+  }
+  .topnav .brand{display:flex; align-items:center; gap:9px; color:var(--text); letter-spacing:.04em;}
+  .topnav .brand .dot{width:7px;height:7px;border-radius:50%;background:var(--net);box-shadow:0 0 8px var(--net);}
+  .topnav nav{display:flex; gap:18px; overflow-x:auto;}
+  .topnav nav a{
+    color:var(--text-dim); text-decoration:none; white-space:nowrap;
+    padding-bottom:2px; border-bottom:1px solid transparent;
+    transition:color .15s, border-color .15s;
+  }
+  .topnav nav a:hover{color:var(--net); border-color:var(--net);}
+
+  /* ---------- HERO / MONITOR WALL ---------- */
+  .hero{
+    padding:64px clamp(16px,4vw,44px) 30px;
+    max-width:1180px; margin:0 auto;
+  }
+  .hero-boot{
+    font-family:var(--mono); font-size:11px; color:var(--text-faint);
+    letter-spacing:.06em; margin-bottom:18px; min-height:16px;
+  }
+  .hero-boot .ok{color:var(--net);}
+  .hero h1{
+    font-family:var(--mono); font-weight:600;
+    font-size:clamp(30px,5.4vw,58px);
+    line-height:1.05; margin:0 0 10px; letter-spacing:-0.01em;
+  }
+  .hero h1 span{color:var(--net);}
+  .hero .role{
+    font-size:clamp(15px,2vw,19px); color:var(--text-dim); margin:0 0 26px;
+    max-width:640px; line-height:1.5;
+  }
+  .hero .meta-row{
+    display:flex; flex-wrap:wrap; gap:10px 14px;
+    font-family:var(--mono); font-size:12.5px; color:var(--text-dim);
+    margin-bottom:34px;
+  }
+  .hero .meta-row span{display:flex; align-items:center; gap:7px;}
+  .hero .meta-row .k{color:var(--amber);}
+
+  /* wall of camera preview tiles = quick nav */
+  .wall{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    gap:10px;
+  }
+  .tile{
+    position:relative;
+    border:1px solid var(--line); border-radius:3px;
+    background:var(--panel-2);
+    padding:12px 12px 14px;
+    text-decoration:none; color:var(--text);
+    display:flex; flex-direction:column; justify-content:space-between;
+    min-height:92px;
+    transition:border-color .18s, transform .18s, background .18s;
+  }
+  .tile:hover{border-color:var(--net); transform:translateY(-2px); background:#101822;}
+  .tile .tile-top{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--mono); font-size:9.5px; color:var(--text-faint); letter-spacing:.06em;
+  }
+  .tile .tile-top .d{width:5px;height:5px;border-radius:50%;background:var(--rec); box-shadow:0 0 6px var(--rec);}
+  .tile .tile-label{font-family:var(--mono); font-size:13px; margin-top:14px; color:var(--text);}
+  .tile .tile-sub{font-size:10.5px; color:var(--text-faint); font-family:var(--mono); margin-top:2px;}
+
+  /* ---------- SECTION HEADINGS ---------- */
+  .section{padding:8px clamp(16px,4vw,44px) 0;}
+  .section-label{
+    max-width:920px; margin:46px auto 14px;
+    display:flex; align-items:baseline; gap:12px;
+    font-family:var(--mono); font-size:12px; color:var(--text-faint); letter-spacing:.1em;
+  }
+  .section-label .n{color:var(--amber);}
+  .section-label .line{flex:1; height:1px; background:var(--line-soft);}
+  h2.feed-title{
+    font-family:var(--mono); font-size:clamp(19px,2.6vw,25px); margin:0 0 16px; color:var(--text);
+  }
+  p.lead{color:var(--text-dim); line-height:1.75; font-size:15px; max-width:70ch; margin:0 0 8px;}
+
+  /* ---------- SKILLS ---------- */
+  .skill-groups{display:grid; gap:22px;}
+  .skill-group h3{
+    font-family:var(--mono); font-size:12px; color:var(--net); letter-spacing:.08em;
+    margin:0 0 10px; text-transform:uppercase;
+  }
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    font-family:var(--mono); font-size:12px; color:var(--text);
+    border:1px solid var(--line); background:var(--panel-2);
+    padding:6px 11px; border-radius:2px;
+  }
+
+  /* ---------- EXPERIENCE LOG ---------- */
+  .log{border-left:1px solid var(--line); margin-left:4px;}
+  .log-item{position:relative; padding:2px 0 26px 26px;}
+  .log-item:last-child{padding-bottom:2px;}
+  .log-item::before{
+    content:""; position:absolute; left:-5px; top:5px;
+    width:9px; height:9px; border-radius:50%;
+    background:var(--bg); border:2px solid var(--net);
+  }
+  .log-time{
+    font-family:var(--mono); font-size:11px; color:var(--amber); letter-spacing:.04em;
+    margin-bottom:4px;
+  }
+  .log-role{font-weight:600; font-size:15.5px; margin:0 0 2px;}
+  .log-org{font-size:13px; color:var(--text-dim); margin:0 0 10px;}
+  .log ul{margin:0; padding-left:18px; color:var(--text-dim); font-size:14px; line-height:1.7;}
+  .log ul li::marker{color:var(--text-faint);}
+
+  /* ---------- PROJECT CARDS ---------- */
+  .proj-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px;}
+  .proj-card{
+    border:1px solid var(--line); background:var(--panel-2); border-radius:3px;
+    padding:16px 16px 18px;
+  }
+  .proj-card .tag{font-family:var(--mono); font-size:10.5px; color:var(--net); letter-spacing:.06em;}
+  .proj-card h4{margin:8px 0 6px; font-size:14.5px;}
+  .proj-card p{margin:0; font-size:13px; color:var(--text-dim); line-height:1.6;}
+
+  /* ---------- EDU / CERT / LANG ---------- */
+  .info-row{
+    display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    padding:16px 0; border-bottom:1px solid var(--line-soft);
+  }
+  .info-row:last-child{border-bottom:none;}
+  .info-row h4{margin:0 0 4px; font-size:15px;}
+  .info-row .sub{font-size:13px; color:var(--text-dim);}
+  .info-row .when{font-family:var(--mono); font-size:12px; color:var(--amber); white-space:nowrap;}
+  .bar-wrap{display:flex; align-items:center; gap:10px; min-width:160px;}
+  .bar{flex:1; height:5px; background:var(--line-soft); border-radius:3px; overflow:hidden;}
+  .bar i{display:block; height:100%; background:var(--net); border-radius:3px;}
+  .bar-label{font-family:var(--mono); font-size:11px; color:var(--text-faint); white-space:nowrap;}
+
+  /* ---------- CONTACT / TERMINAL ---------- */
+  .terminal{
+    max-width:920px; margin:0 auto 60px;
+    background:#070a0d; border:1px solid var(--line); border-radius:4px;
+    padding:26px clamp(18px,4vw,40px) 32px; font-family:var(--mono);
+  }
+  .terminal .tbar{display:flex; gap:6px; margin-bottom:18px;}
+  .terminal .tbar span{width:9px; height:9px; border-radius:50%; background:var(--line);}
+  .terminal .prompt{color:var(--net);}
+  .terminal .out{color:var(--text-dim); margin:4px 0 4px 16px;}
+  .contact-links{display:flex; flex-wrap:wrap; gap:12px; margin-top:20px;}
+  .contact-links a{
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid var(--line); padding:10px 16px; border-radius:3px;
+    text-decoration:none; font-family:var(--mono); font-size:13px; color:var(--text);
+    transition:border-color .18s, color .18s;
+  }
+  .contact-links a:hover{border-color:var(--rec); color:var(--rec);}
+
+  footer{
+    text-align:center; padding:24px; font-family:var(--mono); font-size:11px;
+    color:var(--text-faint); border-top:1px solid var(--line-soft);
+  }
+
+  @media (max-width:560px){
+    .hud-top{font-size:9.5px;}
+    .log ul{padding-left:16px;}
+  }
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+
+<div class="topnav">
+  <div class="brand"><span class="dot"></span> AAH // MONITORING SYSTEM</div>
+  <nav>
+    <a href="#profil">Profil</a>
+    <a href="#keahlian">Keahlian</a>
+    <a href="#pengalaman">Pengalaman</a>
+    <a href="#proyek">Proyek</a>
+    <a href="#pendidikan">Pendidikan</a>
+    <a href="#kontak">Kontak</a>
+  </nav>
+</div>
+
+<section class="hero">
+  <div class="hero-boot" id="bootLine">&gt; menginisialisasi sistem<span class="cursor">_</span></div>
+  <h1>Ahmad Aditya <span>Harmawan</span></h1>
+  <p class="role">Lulusan Teknik Informatika dengan pengalaman langsung di jaringan komputer, instalasi CCTV/DVR, dan pengembangan web — terbiasa masuk ke sistem dari kabel hingga kode.</p>
+  <div class="meta-row">
+    <span><span class="k">LOKASI</span> Bandung, Jawa Barat, ID</span>
+    <span><span class="k">TELP</span> 087776503014</span>
+    <span><span class="k">EMAIL</span> ahmadadityaharmawan87@gmail.com</span>
+    <span><span class="k">SERTIFIKASI</span> HUAWEI HCIA</span>
+  </div>
+
+  <div class="wall">
+    <a class="tile" href="#profil">
+      <div class="tile-top"><span>CAM 01</span><span class="d"></span></div>
+      <div><div class="tile-label">Profil</div><div class="tile-sub">ringkasan</div></div>
+    </a>
+    <a class="tile" href="#keahlian">
+      <div class="tile-top"><span>CAM 02</span><span class="d"></span></div>
+      <div><div class="tile-label">Keahlian</div><div class="tile-sub">teknis &amp; umum</div></div>
+    </a>
+    <a class="tile" href="#pengalaman">
+      <div class="tile-top"><span>CAM 03</span><span class="d"></span></div>
+      <div><div class="tile-label">Pengalaman</div><div class="tile-sub">log riwayat kerja</div></div>
+    </a>
+    <a class="tile" href="#proyek">
+      <div class="tile-top"><span>CAM 04</span><span class="d"></span></div>
+      <div><div class="tile-label">Proyek</div><div class="tile-sub">data &amp; ML</div></div>
+    </a>
+    <a class="tile" href="#pendidikan">
+      <div class="tile-top"><span>CAM 05</span><span class="d"></span></div>
+      <div><div class="tile-label">Pendidikan</div><div class="tile-sub">&amp; sertifikasi</div></div>
+    </a>
+    <a class="tile" href="#kontak">
+      <div class="tile-top"><span>CAM 06</span><span class="d"></span></div>
+      <div><div class="tile-label">Kontak</div><div class="tile-sub">hubungi</div></div>
+    </a>
+  </div>
+</section>
+
+<div class="section">
+  <!-- PROFIL -->
+  <div class="section-label"><span class="n">01</span><span>PROFIL</span><span class="line"></span></div>
+  <div class="feed" id="profil">
+    <div class="hud-top">
+      <span class="hud-rec"><span class="rec-dot"></span>REC</span>
+      <span class="cam-tag">CAM 01 — OVERVIEW</span>
+      <span class="hud-clock" data-clock></span>
+    </div>
+    <h2 class="feed-title">Ringkasan Profil</h2>
+    <p class="lead">Lulusan S1 Teknik Informatika Institut Teknologi Nasional (ITN) Bandung dengan IPK 3.14/4.00. Memiliki pengalaman praktis di bidang IT support, jaringan komputer, dan hardware — mencakup instalasi &amp; konfigurasi CCTV/DVR, setting jaringan, serta troubleshooting perangkat. Pernah mendampingi dan mengajar praktik laboratorium Internet of Things, dan mengantongi sertifikasi HUAWEI Certified ICT Associate (HCIA) di bidang jaringan komputer.</p>
+    <p class="lead">Terbiasa bekerja lintas peran — dari lapangan (instalasi &amp; maintenance sistem CCTV) hingga di balik layar (pengembangan web dengan Laravel) — didukung kemampuan komunikasi, problem-solving, dan manajemen waktu yang kuat.</p>
+  </div>
+
+  <!-- KEAHLIAN -->
+  <div class="section-label"><span class="n">02</span><span>KEAHLIAN</span><span class="line"></span></div>
+  <div class="feed" id="keahlian">
+    <div class="hud-top">
+      <span class="hud-rec"><span class="rec-dot"></span>REC</span>
+      <span class="cam-tag">CAM 02 — SYSTEM CAPABILITIES</span>
+      <span class="hud-clock" data-clock></span>
+    </div>
+    <h2 class="feed-title">Keahlian</h2>
+    <div class="skill-groups">
+      <div class="skill-group">
+        <h3>Teknis IT</h3>
+        <div class="chips">
+          <span class="chip">Instalasi &amp; Konfigurasi CCTV (DVR/NVR)</span>
+          <span class="chip">Setting &amp; Troubleshooting Jaringan</span>
+          <span class="chip">Dasar Jaringan Komputer (HCIA)</span>
+          <span class="chip">Arduino &amp; Pemrograman Sensor</span>
+          <span class="chip">Instalasi Perangkat Keras/Lunak</span>
+          <span class="chip">MySQL</span>
+          <span class="chip">Laravel</span>
+          <span class="chip">PHP</span>
+          <span class="chip">CSS</span>
+          <span class="chip">Flutter</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>Pendukung</h3>
+        <div class="chips">
+          <span class="chip">Microsoft Excel</span>
+          <span class="chip">Microsoft PowerPoint</span>
+          <span class="chip">Figma</span>
+          <span class="chip">Adobe XD</span>
+          <span class="chip">Adobe Photoshop</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>Umum</h3>
+        <div class="chips">
+          <span class="chip">Problem-solving</span>
+          <span class="chip">Analytical thinking</span>
+          <span class="chip">Teamwork</span>
+          <span class="chip">Planning</span>
+          <span class="chip">Communication</span>
+          <span class="chip">Multitasking</span>
+          <span class="chip">Coordination</span>
+          <span class="chip">Task prioritization</span>
+          <span class="chip">Collaboration</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENGALAMAN -->
+  <div class="section-label"><span class="n">03</span><span>PENGALAMAN KERJA</span><span class="line"></span></div>
+  <div class="feed" id="pengalaman">
+    <div class="hud-top">
+      <span class="hud-rec"><span class="rec-dot"></span>REC</span>
+      <span class="cam-tag">CAM 03 — ACTIVITY LOG</span>
+      <span class="hud-clock" data-clock></span>
+    </div>
+    <h2 class="feed-title">Pengalaman Kerja</h2>
+    <div class="log">
+      <div class="log-item">
+        <div class="log-time">BERJALAN · 3–4 BULAN / PROYEK</div>
+        <div class="log-role">Teknisi Instalasi CCTV (Freelance)</div>
+        <div class="log-org">Freelance — Bandung, Jawa Barat</div>
+        <ul>
+          <li>Melakukan instalasi CCTV pada berbagai lokasi proyek</li>
+          <li>Melakukan konfigurasi DVR</li>
+          <li>Melakukan setting jaringan untuk mendukung sistem CCTV</li>
+          <li>Melakukan maintenance rutin terhadap sistem CCTV yang telah terpasang</li>
+        </ul>
+      </div>
+      <div class="log-item">
+        <div class="log-time">NOV 2025 — JAN 2026</div>
+        <div class="log-role">Safety Assistant K3</div>
+        <div class="log-org">Duta Surya Arcana — Karawang, Jawa Barat</div>
+        <ul>
+          <li>Mengidentifikasi risiko kerja</li>
+          <li>Menyusun dan menerapkan prosedur K3</li>
+          <li>Monitoring dan evaluasi pelaksanaan K3</li>
+          <li>Menangani kecelakaan kerja</li>
+          <li>Memastikan kepatuhan terhadap regulasi keselamatan kerja</li>
+          <li>Pengelolaan alat keselamatan</li>
+        </ul>
+      </div>
+      <div class="log-item">
+        <div class="log-time">10 NOV — 15 DES 2024</div>
+        <div class="log-role">Surveyor Evaluasi Layanan SPBU</div>
+        <div class="log-org">Pertamina Patra Niaga — Bandung, Jawa Barat</div>
+        <ul>
+          <li>Melakukan survey kepuasan pelanggan</li>
+        </ul>
+      </div>
+      <div class="log-item">
+        <div class="log-time">SEP 2022 – JAN 2023 &amp; SEP 2023 – JAN 2024</div>
+        <div class="log-role">Asisten Laboratorium Internet of Things</div>
+        <div class="log-org">Institut Teknologi Nasional — Bandung, Jawa Barat</div>
+        <ul>
+          <li>Membantu kepala laboratorium dan memantau pelaksanaan praktik</li>
+          <li>Ikut serta dalam pengembangan materi praktik (modul)</li>
+          <li>Mengajarkan Arduino dan pemrograman sensor</li>
+          <li>Mengajarkan pembuatan situs web, API, dan aplikasi seluler</li>
+          <li>Menilai pekerjaan siswa</li>
+        </ul>
+      </div>
+      <div class="log-item">
+        <div class="log-time">JUL 2022 — OKT 2022</div>
+        <div class="log-role">Web Developer (Professional Internship)</div>
+        <div class="log-org">DISKOMINFO Kabupaten Bandung — Bandung, Jawa Barat</div>
+        <ul>
+          <li>Mendesain tampilan website</li>
+          <li>Mengumpulkan data untuk kebutuhan pengembangan aplikasi</li>
+          <li>Membuat dokumen aplikasi fungsional dan teknis</li>
+          <li>Memprogram tampilan desain awal menggunakan Laravel dengan tetap menjaga performa website</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROYEK -->
+  <div class="section-label"><span class="n">04</span><span>PROYEK</span><span class="line"></span></div>
+  <div class="feed" id="proyek">
+    <div class="hud-top">
+      <span class="hud-rec"><span class="rec-dot"></span>REC</span>
+      <span class="cam-tag">CAM 04 — DATA FEED</span>
+      <span class="hud-clock" data-clock></span>
+    </div>
+    <h2 class="feed-title">Analisis Data — Machine Learning &amp; Deep Learning (2022)</h2>
+    <p class="lead" style="margin-bottom:18px;">Institut Teknologi Nasional, Bandung — tugas mandiri analisis data mahasiswa.</p>
+    <div class="proj-grid">
+      <div class="proj-card">
+        <div class="tag">REGRESI LINIER · EXCEL</div>
+        <h4>Kalori vs Berat Badan</h4>
+        <p>Analisis pengaruh jumlah kalori/hari terhadap berat badan menggunakan algoritma regresi linier.</p>
+      </div>
+      <div class="proj-card">
+        <div class="tag">K-MEANS CLUSTERING · PYTHON</div>
+        <h4>Segmentasi Pemahaman Siswa</h4>
+        <p>Implementasi clustering K-Means pada dataset siswa berdasarkan tingkat pemahaman pembelajaran.</p>
+      </div>
+      <div class="proj-card">
+        <div class="tag">NAIVE BAYES</div>
+        <h4>Penerapan Metode Klasifikasi</h4>
+        <p>Menerapkan metode pembelajaran mesin Naive Bayes pada studi kasus tugas mandiri.</p>
+      </div>
+      <div class="proj-card">
+        <div class="tag">EXCEL</div>
+        <h4>Klasifikasi Kualitas Produk</h4>
+        <p>Menentukan persentase produk pada kategori baik dan buruk dari data produksi.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENDIDIKAN & SERTIFIKASI -->
+  <div class="section-label"><span class="n">05</span><span>PENDIDIKAN &amp; SERTIFIKASI</span><span class="line"></span></div>
+  <div class="feed" id="pendidikan">
+    <div class="hud-top">
+      <span class="hud-rec"><span class="rec-dot"></span>REC</span>
+      <span class="cam-tag">CAM 05 — RECORDS</span>
+      <span class="hud-clock" data-clock></span>
+    </div>
+    <h2 class="feed-title">Pendidikan</h2>
+    <div class="info-row">
+      <div>
+        <h4>S1 Teknik Informatika</h4>
+        <div class="sub">Institut Teknologi Nasional, Bandung · IPK 3.14/4.00</div>
+        <div class="sub">Anggota Himpunan Mahasiswa Teknik Informatika; Kepala Divisi Rumah Tangga (2022/2023)</div>
+      </div>
+      <div class="when">LULUS 2024</div>
+    </div>
+    <div class="info-row">
+      <div>
+        <h4>SMA PGII 1 Bandung</h4>
+        <div class="sub">Jurusan IPA · Bandung, Jawa Barat</div>
+      </div>
+    </div>
+
+    <h2 class="feed-title" style="margin-top:34px;">Sertifikasi</h2>
+    <div class="info-row">
+      <div>
+        <h4>HUAWEI Certified ICT Associate (HCIA)</h4>
+        <div class="sub">Indonesian Student Micro Credential (KMMI) — ITN Bandung bekerja sama dengan Huawei</div>
+        <div class="sub">Sertifikasi pembelajaran jaringan komputer era 5G</div>
+      </div>
+      <div class="when">AGU – DES 2021</div>
+    </div>
+
+    <h2 class="feed-title" style="margin-top:34px;">Bahasa</h2>
+    <div class="info-row">
+      <div><h4>Bahasa Indonesia</h4></div>
+      <div class="bar-wrap"><span class="bar-label">NATIVE</span><div class="bar"><i style="width:100%"></i></div></div>
+    </div>
+    <div class="info-row">
+      <div><h4>Bahasa Inggris</h4></div>
+      <div class="bar-wrap"><span class="bar-label">INTERMEDIATE</span><div class="bar"><i style="width:60%"></i></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- KONTAK -->
+<div class="section-label" style="max-width:920px;"><span class="n">06</span><span>KONTAK</span><span class="line"></span></div>
+<div class="terminal" id="kontak">
+  <div class="tbar"><span></span><span></span><span></span></div>
+  <div><span class="prompt">$</span> hubungi --ahmad-aditya-harmawan</div>
+  <div class="out">menghubungkan ke saluran kontak yang tersedia...</div>
+  <div class="out">status: <span style="color:var(--net)">terbuka untuk peluang kerja</span></div>
+  <div class="contact-links">
+    <a href="mailto:ahmadadityaharmawan87@gmail.com">✉ ahmadadityaharmawan87@gmail.com</a>
+    <a href="tel:087776503014">☎ 087776503014</a>
+    <a href="#top">📍 Bandung, Jawa Barat, ID</a>
+  </div>
+</div>
+
+<footer>SYSTEM STATUS: ONLINE · AHMAD ADITYA HARMAWAN © 2026</footer>
+
+<script>
+  // live clock on every HUD
+  function pad(n){return n.toString().padStart(2,'0');}
+  function tick(){
+    const d = new Date();
+    const str = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+    document.querySelectorAll('[data-clock]').forEach(el => el.textContent = str);
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // boot sequence line
+  const bootMessages = [
+    '&gt; menginisialisasi sistem',
+    '&gt; memuat feed kamera... OK',
+    '&gt; memuat riwayat &amp; data... OK',
+    '&gt; sistem siap.'
+  ];
+  let bi = 0;
+  const bootEl = document.getElementById('bootLine');
+  const bootTimer = setInterval(() => {
+    bi++;
+    if(bi < bootMessages.length){
+      bootEl.innerHTML = bootMessages[bi] + '<span class="cursor">_</span>';
+    } else {
+      bootEl.innerHTML = bootMessages[bootMessages.length-1].replace('&gt;','<span class="ok">✓</span>') + '';
+      clearInterval(bootTimer);
+    }
+  }, 550);
+</script>
+</body>
+</html>
